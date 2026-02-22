@@ -5,8 +5,10 @@ Video indirme uygulaması - YouTube ve nsosyal.com destekli
 ## Kurulum
 
 ```bash
-# Virtual environment oluştur
+# Virtual environment oluştur (ilk kez oluşturursun - eğer venv varsa atla)
 python -m venv venv
+
+# Virtual environment aktifleştir (mac/linux için)
 source venv/bin/activate
 
 # Bağımlılıkları yükle
@@ -14,6 +16,9 @@ pip install -r requirements.txt
 
 # Playwright tarayıcılarını yükle
 playwright install
+# Eğer sadece chromium kullanırsan
+playwright install chromium
+
 
 # Sistem bağımlılıkları (isteğe bağlı)
 sudo apt install ffmpeg

@@ -48,7 +48,6 @@ def get_m3u8_url(web_url):
         return m3u8_link
 
 @app.route('/')
-
 def index():
     return render_template('index.html')
 
@@ -84,7 +83,6 @@ def preview():
         return redirect(url_for('index'))
 
 @app.route('/download', methods=['POST'])
-
 def download():
     url = request.form.get('url')
 

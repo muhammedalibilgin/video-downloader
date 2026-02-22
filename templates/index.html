@@ -6,46 +6,54 @@
 </head>
 <body>
 
-    <div class="card">
-        <h2>Video İndir</h2>
-        <form action="/preview" method="post" id="previewForm">
-            <input type="text" name="url" placeholder="Video Linkini Yapıştır" required value="{{ original_url or '' }}">
-            <button type="submit">Gönder</button>
-        </form>
+    <div class="page-container">
 
-        {% if preview_url %}
-        <div id="videoPreview" style="margin-top: 20px;">
-            <h3>{{ preview_title }}</h3>
-            <video id="previewPlayer" controls style="width: 100%; max-width: 400px;">
-                <source src="{{ preview_url }}" type="video/mp4">
-                Tarayıcınız video önizlemeyi desteklemiyor.
-            </video>
-            <form action="/download" method="post" style="margin-top: 10px;" onsubmit="console.log('İndir formu gönderiliyor:', this.url.value);">
-                <input type="hidden" name="url" value="{{ original_url }}">
-                <button type="submit">İndir</button>
-            </form>
+        <div class="header">
+            <h1>Video Downloader</h1>
+            <p><a href="https://nsosyal.com" target="_blank">NSosyal</a></a> ve <a href="https://youtube.com" target="_blank">YouTube</a> videolarını kolayca indirin</p>
         </div>
-        {% else %}
-        <div id="videoPreview" style="display: none; margin-top: 20px;">
-            <video id="previewPlayer" controls style="width: 100%; max-width: 400px;">
-                <source src="" type="video/mp4">
-                Tarayıcınız video önizlemeyi desteklemiyor.
-            </video>
-            <form action="/download" method="post" style="margin-top: 10px;">
-                <input type="hidden" name="url" id="hiddenUrl">
-                <button type="submit">İndir</button>
+        <div class="card">
+            <h2>Video İndir</h2>
+            <form action="/preview" method="post" id="previewForm">
+                <input type="text" name="url" placeholder="Video Linkini Yapıştır" required value="{{ original_url or '' }}">
+                <button type="submit">Gönder</button>
             </form>
+    
+            {% if preview_url %}
+            <div id="videoPreview" style="margin-top: 20px;">
+                <h3>{{ preview_title }}</h3>
+                <video id="previewPlayer" controls style="width: 100%; max-width: 400px;">
+                    <source src="{{ preview_url }}" type="video/mp4">
+                    Tarayıcınız video önizlemeyi desteklemiyor.
+                </video>
+                <form action="/download" method="post" style="margin-top: 10px;" onsubmit="console.log('İndir formu gönderiliyor:', this.url.value);">
+                    <input type="hidden" name="url" value="{{ original_url }}">
+                    <button type="submit">İndir</button>
+                </form>
+            </div>
+            {% else %}
+            <div id="videoPreview" style="display: none; margin-top: 20px;">
+                <video id="previewPlayer" controls style="width: 100%; max-width: 400px;">
+                    <source src="" type="video/mp4">
+                    Tarayıcınız video önizlemeyi desteklemiyor.
+                </video>
+                <form action="/download" method="post" style="margin-top: 10px;">
+                    <input type="hidden" name="url" id="hiddenUrl">
+                    <button type="submit">İndir</button>
+                </form>
+            </div>
+            {% endif %}
+            
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+            {% endwith %}        
         </div>
-        {% endif %}
-        
-        {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            {% for message in messages %}
-            <div class="alert">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-        {% endwith %}        
     </div>
+
 
 </body>
 </html>
