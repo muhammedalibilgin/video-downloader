@@ -3,3 +3,5 @@ yt-dlp
 playwright
 requests
 gunicorn
+flask-sqlalchemy
+python-dotenv

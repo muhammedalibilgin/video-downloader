@@ -24,6 +24,28 @@ playwright install chromium
 sudo apt install ffmpeg
 ```
 
+## Güvenlik Ayarları
+
+**ÖNEMLİ:** Production ortamında güvenlik için environment variable'ları kullanın:
+
+```bash
+# .env dosyası oluştur
+cp .env.example .env
+
+# .env dosyasını düzenle ve güvenli şifreler kullan
+nano .env
+```
+
+**Environment Variables:**
+- `ADMIN_USERNAME`: Admin paneli kullanıcı adı
+- `ADMIN_PASSWORD`: Admin paneli şifresi (güçlü şifre kullanın!)
+- `FLASK_SECRET_KEY`: Flask secret key (rastgele string kullanın)
+
+**Production İçin Güvenlik Önerileri:**
+1. `.env` dosyasını asla GitHub'a push etmeyin (.gitignore'da var)
+2. Güçlü şifreler kullanın
+3. Docker/Dokploy'da environment variable'ları güvenli şekilde ayarlayın
+
 ## Çalıştırma
 
 ```bash
