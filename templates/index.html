@@ -3,14 +3,17 @@
 <head>
     <title>Video Downloader</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
 </head>
 <body>
 
     <div class="page-container">
 
         <div class="header">
-            <h1>Video Downloader</h1>
-            <p><a href="https://nsosyal.com" target="_blank">NSosyal</a></a> ve <a href="https://youtube.com" target="_blank">YouTube</a> videolarını kolayca indirin</p>
+            <a href="/">
+                <img src="{{ url_for('static', filename='images/video-downloader-logo.png') }}" alt="Video Downloader Logo" class="logo">
+            </a>
+            <p><a href="https://nsosyal.com" target="_blank">NSosyal</a></a>, <a href="https://youtube.com" target="_blank">YouTube</a> ve diğer bir çok platformdan videoları kolayca indirin</p>
         </div>
         <div class="card">
             <h2>Video İndir</h2>
