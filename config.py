@@ -22,3 +22,7 @@ class Config:
     
     # Visitor log limiti
     VISITOR_LOG_LIMIT = 500
+    
+    # Rate limiting
+    RATE_LIMIT_PER_MINUTE = "3 per minute"
+    RATE_LIMIT_PER_DAY = "30 per day"

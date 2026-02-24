@@ -9,4 +9,4 @@ cmds = [
 ]
 
 [start]
-cmd = "/opt/venv/bin/gunicorn --workers 2 --bind 0.0.0.0:3000 app:app"
+cmd = "/opt/venv/bin/gunicorn --workers 1 --worker-class sync --bind 0.0.0.0:3000 app:app"

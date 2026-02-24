@@ -2,8 +2,38 @@ from playwright.sync_api import sync_playwright
 import yt_dlp
 import os
 import time
+import re
+import uuid
+from urllib.parse import urlparse
+import ipaddress
+import socket
 from flask import send_file
 from config import Config
+
+def is_safe_url(url):
+    """SSRF koruması: URL'in güvenli olup olmadığını kontrol et"""
+    if not url:
+        return False
+    
+    parsed = urlparse(url)
+    if parsed.scheme not in ["http", "https"]:
+        return False
+
+    try:
+        ip = socket.gethostbyname(parsed.hostname)
+        ip_obj = ipaddress.ip_address(ip)
+        if (
+            ip_obj.is_private
+            or ip_obj.is_loopback
+            or ip_obj.is_reserved
+            or ip_obj.is_link_local
+            or ip_obj.is_multicast
+        ):
+            return False
+    except:
+        return False
+
+    return True
 
 def get_m3u8_url(web_url):
     """Web sayfasından m3u8 linkini yakala"""
@@ -25,7 +55,7 @@ def get_m3u8_url(web_url):
             
             # Sayfaya git ve biraz bekle (videonun yüklenmesi için)
             try:
-                page.goto(web_url, wait_until="load", timeout=60000)
+                page.goto(web_url, wait_until="load", timeout=40000)
             except:
                 pass
             
@@ -44,6 +74,10 @@ def get_m3u8_url(web_url):
 
 def get_video_info(url):
     """Video bilgilerini al"""
+    # SSRF koruması
+    if not is_safe_url(url):
+        raise Exception("Güvenli olmayan URL: Private/local adreslere erişim engellenmiştir.")
+    
     # 1. Önce m3u8 linkini yakalamaya çalış
     print(f"Kaynak taranıyor: {url}")
     m3u8_url = get_m3u8_url(url)
@@ -66,6 +100,10 @@ def get_video_info(url):
 
 def download_video(url):
     """Videoyu indir ve dosya olarak gönder"""
+    # SSRF koruması
+    if not is_safe_url(url):
+        raise Exception("Güvenli olmayan URL: Private/local adreslere erişim engellenmiştir.")
+    
     # 1. Önce m3u8 linkini yakalamaya çalış
     print(f"Kaynak taranıyor: {url}")
     m3u8_url = get_m3u8_url(url)
@@ -75,33 +113,44 @@ def download_video(url):
     print(f"İndirilecek URL: {final_url}")
     
     try:
-        # Önce orijinal URL'den başlık bilgisi almayı dene
-        title = None
-        try:
-            with yt_dlp.YoutubeDL({'quiet': True}) as ydl:
-                info = ydl.extract_info(url, download=False)
-                title = info.get('title', None)
-        except:
-            pass
-        
-        # Başlık alınamazsa zaman damgası kullan
-        if not title:
-            title = f"video_{int(time.time())}"
-        
         # Download klasörünün varlığını kontrol et
         if not os.path.exists(Config.DOWNLOAD_FOLDER):
             os.makedirs(Config.DOWNLOAD_FOLDER)
         
+        # Unique filename oluştur (race condition önlemek için)
+        unique_id = str(uuid.uuid4())
+        
         ydl_opts = {
             'format': 'best',
-            'outtmpl': f'{Config.DOWNLOAD_FOLDER}/{title}.%(ext)s',
-            'restrictfilenames': True,  # Dosya adında geçersiz karakterleri temizle
+            'outtmpl': f'{Config.DOWNLOAD_FOLDER}/{unique_id}.%(ext)s',
+            'restrictfilenames': True,
+            'max_filesize': 200 * 1024 * 1024,  # 200MB limit
             'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         }
         
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(final_url, download=True)
+            
+            # Diskteki gerçek dosya adı
             filename = ydl.prepare_filename(info)
-            return send_file(filename, as_attachment=True)
+            
+            # Kullanıcıya gösterilecek güvenli dosya adı
+            title = info.get('title', f"video_{unique_id}")
+            safe_title = re.sub(r"[^a-zA-Z0-9_-]", "_", title)[:80]
+            file_ext = os.path.splitext(filename)[1]
+            display_name = f"{safe_title}{file_ext}"
+            
+            response = send_file(filename, as_attachment=True, download_name=display_name)
+            
+            # Response gerçekten kapandığında dosyayı sil
+            @response.call_on_close
+            def cleanup():
+                try:
+                    os.remove(filename)
+                    print(f"Dosya silindi: {filename}")
+                except Exception as e:
+                    print(f"Dosya silinemedi: {e}")
+            
+            return response
     except Exception as e:
         raise Exception(f"Hata: Bu URL desteklenmiyor veya video bulunamadı. {e}")
