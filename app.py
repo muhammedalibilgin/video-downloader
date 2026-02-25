@@ -44,6 +44,11 @@ db.init_app(app)
 # SQLite konfigürasyonunu çağır
 configure_sqlite()
 
+ # Veritabanı tablolarını oluştur
+with app.app_context():
+    db.create_all()
+    print("Veritabanı tabloları (Gunicorn/Main) kontrol edildi/oluşturuldu.")
+
 # Download klasörünün varlığını kontrol et
 if not os.path.exists(Config.DOWNLOAD_FOLDER):
     os.makedirs(Config.DOWNLOAD_FOLDER)
@@ -128,10 +133,5 @@ def admin_visitors():
             'error': str(e)
         }), 500
 
-if __name__ == '__main__':
-    # Veritabanı tablolarını oluştur
-    with app.app_context():
-        db.create_all()
-        print("Veritabanı tabloları oluşturuldu.")
-    
+if __name__ == '__main__':    
     app.run(host='0.0.0.0', port=5001, debug=False)
