@@ -93,10 +93,11 @@ def preview():
         return redirect(url_for('index'))
     
     try:
-        # Preview işlemi logla
-        log_download_preview(url)
-        
+        # Preview işlemi logla (boyut bilgisi ile)
         video_info = get_video_info(url)
+        file_size = video_info.get('file_size')  # Boyut bilgisini al
+        log_download_preview(url, file_size=file_size)
+        
         return render_template('index.html', 
                              preview_url=video_info['video_url'], 
                              preview_title=video_info['title'],
@@ -122,19 +123,28 @@ def download():
         return redirect(url_for('index'))
     
     try:
-        # Download denemesini logla
-        log_download_attempt(url)
+        # Download denemesini logla (boyut bilgisi ile)
+        video_info = get_video_info(url)
+        file_size = video_info.get('file_size')
+        log_download_attempt(url, file_size=file_size)
         
         # Videoyu indirmeyi dene
         result = download_video(url)
         
         # Başarılı olduğunu logla
-        log_download_result(url, success=True)
+        log_download_result(url, success=True, file_size=file_size)
         
         return result
     except Exception as e:
         # Başarısız olduğunu logla
-        log_download_result(url, success=False)
+        video_info = None
+        try:
+            video_info = get_video_info(url)
+            file_size = video_info.get('file_size')
+        except:
+            file_size = None
+        
+        log_download_result(url, success=False, file_size=file_size)
         
         flash(f"Hata oluştu: {e}")
         return f"<h3>Hata: Bu URL desteklenmiyor / Boyut sınırı aşıldı veya Video bulunamadı.</h3><a href='/'>Geri Dön</a>", 400

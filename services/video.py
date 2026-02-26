@@ -103,7 +103,8 @@ def get_video_info(url):
     return {
         'video_url': video_url,
         'title': title,
-        'original_url': url
+        'original_url': url,
+        'file_size': file_size  # Boyut bilgisini de ekle
     }
 
 def download_video(url):

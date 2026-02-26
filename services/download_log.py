@@ -2,7 +2,7 @@ from flask import request
 from models import DownloadLog, db
 from config import Config
 
-def log_download_preview(video_url):
+def log_download_preview(video_url, file_size=None):
     """Preview işlemi logla"""
     # Gerçek IP adresini al (reverse proxy arkasında çalışmak için)
     if request.headers.getlist("X-Forwarded-For"):
@@ -14,11 +14,11 @@ def log_download_preview(video_url):
     user_agent = request.headers.get('User-Agent', 'Unknown')
     
     # Yeni download log kaydı oluştur
-    download_log = DownloadLog(ip=ip, video_url=video_url, status='preview', user_agent=user_agent)
+    download_log = DownloadLog(ip=ip, video_url=video_url, status='preview', user_agent=user_agent, file_size=file_size)
     db.session.add(download_log)
     db.session.commit()
 
-def log_download_attempt(video_url):
+def log_download_attempt(video_url, file_size=None):
     """Download denemesi logla"""
     # Gerçek IP adresini al (reverse proxy arkasında çalışmak için)
     if request.headers.getlist("X-Forwarded-For"):
@@ -30,11 +30,11 @@ def log_download_attempt(video_url):
     user_agent = request.headers.get('User-Agent', 'Unknown')
     
     # Yeni download log kaydı oluştur
-    download_log = DownloadLog(ip=ip, video_url=video_url, status='downloading', user_agent=user_agent)
+    download_log = DownloadLog(ip=ip, video_url=video_url, status='downloading', user_agent=user_agent, file_size=file_size)
     db.session.add(download_log)
     db.session.commit()
 
-def log_download_result(video_url, success=True):
+def log_download_result(video_url, success=True, file_size=None):
     """Download sonucu logla"""
     # Gerçek IP adresini al (reverse proxy arkasında çalışmak için)
     if request.headers.getlist("X-Forwarded-For"):
@@ -49,7 +49,7 @@ def log_download_result(video_url, success=True):
     status = 'success' if success else 'failed'
     
     # Yeni download log kaydı oluştur
-    download_log = DownloadLog(ip=ip, video_url=video_url, status=status, user_agent=user_agent)
+    download_log = DownloadLog(ip=ip, video_url=video_url, status=status, user_agent=user_agent, file_size=file_size)
     db.session.add(download_log)
     db.session.commit()
     
