@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, flash, redirect, url_for, jsonify, send_from_directory
+from flask import Flask, render_template, request, flash, redirect, url_for, jsonify, send_from_directory, send_file
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from config import Config
@@ -10,6 +10,7 @@ from services.download_log import log_download_preview, log_download_attempt, lo
 from utils.database import configure_sqlite
 import os
 import time
+import re
 
 def cleanup_old_files():
     """20 dakikadan eski dosyaları temizle"""
@@ -119,8 +120,7 @@ def download():
     url = request.form.get('url')
 
     if not url:
-        flash('Lütfen bir URL girin.')
-        return redirect(url_for('index'))
+        return jsonify({'success': False, 'error': 'Lütfen bir URL girin.'})
     
     try:
         # Download denemesini logla (boyut bilgisi ile)
@@ -134,7 +134,11 @@ def download():
         # Başarılı olduğunu logla
         log_download_result(url, success=True, file_size=file_size)
         
-        return result
+        # AJAX request için JSON response döndür
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify(result)
+        else:
+            return result
     except Exception as e:
         # Başarısız olduğunu logla
         video_info = None
@@ -146,8 +150,46 @@ def download():
         
         log_download_result(url, success=False, file_size=file_size)
         
-        flash(f"Hata oluştu: {e}")
-        return f"<h3>Hata: Bu URL desteklenmiyor / Boyut sınırı aşıldı veya Video bulunamadı.</h3><a href='/'>Geri Dön</a>", 400
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'success': False, 'error': str(e)})
+        else:
+            flash(f"Hata oluştu: {e}")
+            return f"<h3>Hata: Bu URL desteklenmiyor / Boyut sınırı aşıldı veya Video bulunamadı.</h3><a href='/'>Geri Dön</a>", 400
+
+@app.route('/get_file/<file_id>')
+def get_file(file_id):
+    """File ID ile dosyayı gönder"""
+    try:
+        # Download klasöründe dosyayı ara
+        download_folder = Config.DOWNLOAD_FOLDER
+        for filename in os.listdir(download_folder):
+            if file_id in filename:
+                file_path = os.path.join(download_folder, filename)
+                if os.path.isfile(file_path):
+                    # Dosya adını temizle - sadece uzantıyı koru
+                    clean_filename = filename.replace(file_id, '')
+                    if clean_filename.startswith('_'):
+                        clean_filename = clean_filename[1:]
+                    if clean_filename.startswith('.'):
+                        clean_filename = 'video' + clean_filename
+                    
+                    response = send_file(file_path, as_attachment=True, download_name=clean_filename)
+                    
+                    # Response kapandığında dosyayı sil
+                    @response.call_on_close
+                    def cleanup():
+                        try:
+                            os.remove(file_path)
+                            print(f"Dosya silindi: {file_path}")
+                        except Exception as e:
+                            print(f"Dosya silinemedi: {e}")
+                    
+                    return response
+        
+        return jsonify({'success': False, 'error': 'Dosya bulunamadı'}), 404
+    except Exception as e:
+        print(f"Get file error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 # Admin endpoint'i - ziyaretçi loglarını görüntüle (Basic Authentication ile korumalı)
 @app.route('/admin/visitors')

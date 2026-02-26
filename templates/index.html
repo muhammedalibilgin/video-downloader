@@ -36,10 +36,22 @@
                     <source src="{{ preview_url }}" type="video/mp4">
                     Tarayıcınız video önizlemeyi desteklemiyor.
                 </video>
-                <form action="/download" method="post" style="margin-top: 10px;" onsubmit="console.log('İndir formu gönderiliyor:', this.url.value);">
+                <form action="/download" method="post" style="margin-top: 10px;" id="downloadForm">
                     <input type="hidden" name="url" value="{{ original_url }}">
-                    <button type="submit">İndir</button>
+                    <button type="submit" id="downloadBtn">
+                        <span class="btn-text">İndir</span>
+                        <div class="download-loader">
+                            <div class="spinner"></div>
+                            <span class="btn-loading-text">İndiriliyor...</span>
+                        </div>
+                    </button>
                 </form>
+                <div class="download-progress" id="downloadProgress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">Hazırlanıyor...</div>
+                </div>
             </div>
             {% else %}
             <div id="videoPreview" style="display: none; margin-top: 20px;">
@@ -47,10 +59,22 @@
                     <source src="" type="video/mp4">
                     Tarayıcınız video önizlemeyi desteklemiyor.
                 </video>
-                <form action="/download" method="post" style="margin-top: 10px;">
+                <form action="/download" method="post" style="margin-top: 10px;" id="downloadFormDynamic">
                     <input type="hidden" name="url" id="hiddenUrl">
-                    <button type="submit">İndir</button>
+                    <button type="submit" id="downloadBtnDynamic">
+                        <span class="btn-text">İndir</span>
+                        <div class="download-loader">
+                            <div class="spinner"></div>
+                            <span class="btn-loading-text">İndiriliyor...</span>
+                        </div>
+                    </button>
                 </form>
+                <div class="download-progress" id="downloadProgressDynamic">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFillDynamic"></div>
+                    </div>
+                    <div class="progress-text" id="progressTextDynamic">Hazırlanıyor...</div>
+                </div>
             </div>
             {% endif %}
             

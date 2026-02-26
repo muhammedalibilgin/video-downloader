@@ -4,6 +4,7 @@ import os
 import time
 import re
 import uuid
+import flask
 from urllib.parse import urlparse
 import ipaddress
 import socket
@@ -108,7 +109,7 @@ def get_video_info(url):
     }
 
 def download_video(url):
-    """Videoyu indir ve dosya olarak gönder"""
+    """Videoyu indir ve dosya bilgilerini döndür"""
     # SSRF koruması
     if not is_safe_url(url):
         raise Exception("Güvenli olmayan URL: Private/local adreslere erişim engellenmiştir.")
@@ -149,17 +150,27 @@ def download_video(url):
             file_ext = os.path.splitext(filename)[1]
             display_name = f"{safe_title}{file_ext}"
             
-            response = send_file(filename, as_attachment=True, download_name=display_name)
-            
-            # Response gerçekten kapandığında dosyayı sil
-            @response.call_on_close
-            def cleanup():
-                try:
-                    os.remove(filename)
-                    print(f"Dosya silindi: {filename}")
-                except Exception as e:
-                    print(f"Dosya silinemedi: {e}")
-            
-            return response
+            # AJAX request için JSON response döndür
+            if 'X-Requested-With' in flask.request.headers and flask.request.headers['X-Requested-With'] == 'XMLHttpRequest':
+                return {
+                    'success': True,
+                    'file_id': unique_id,
+                    'filename': display_name,
+                    'filepath': filename
+                }
+            else:
+                # Traditional response
+                response = send_file(filename, as_attachment=True, download_name=display_name)
+                
+                # Response gerçekten kapandığında dosyayı sil
+                @response.call_on_close
+                def cleanup():
+                    try:
+                        os.remove(filename)
+                        print(f"Dosya silindi: {filename}")
+                    except Exception as e:
+                        print(f"Dosya silinemedi: {e}")
+                
+                return response
     except Exception as e:
         raise Exception(f"Hata: Bu URL desteklenmiyor veya video bulunamadı. {e}")
