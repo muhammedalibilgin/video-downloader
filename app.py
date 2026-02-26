@@ -6,6 +6,7 @@ from models import db
 from services.auth import requires_auth
 from services.video import get_video_info, download_video
 from services.visitor import log_visitor, get_recent_visitors
+from services.download_log import log_download_preview, log_download_attempt, log_download_result, get_recent_download_logs
 from utils.database import configure_sqlite
 import os
 import time
@@ -92,6 +93,9 @@ def preview():
         return redirect(url_for('index'))
     
     try:
+        # Preview işlemi logla
+        log_download_preview(url)
+        
         video_info = get_video_info(url)
         return render_template('index.html', 
                              preview_url=video_info['video_url'], 
@@ -111,8 +115,20 @@ def download():
         return redirect(url_for('index'))
     
     try:
-        return download_video(url)
+        # Download denemesini logla
+        log_download_attempt(url)
+        
+        # Videoyu indirmeyi dene
+        result = download_video(url)
+        
+        # Başarılı olduğunu logla
+        log_download_result(url, success=True)
+        
+        return result
     except Exception as e:
+        # Başarısız olduğunu logla
+        log_download_result(url, success=False)
+        
         flash(f"Hata oluştu: {e}")
         return f"<h3>Hata: Bu URL desteklenmiyor veya video bulunamadı.</h3><a href='/'>Geri Dön</a>", 400
 
@@ -126,6 +142,23 @@ def admin_visitors():
             'success': True,
             'count': len(visitors),
             'visitors': [visitor.to_dict() for visitor in visitors]
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+# Admin endpoint'i - download loglarını görüntüle (Basic Authentication ile korumalı)
+@app.route('/admin/downloads')
+@requires_auth
+def admin_downloads():
+    try:
+        download_logs = get_recent_download_logs()
+        return jsonify({
+            'success': True,
+            'count': len(download_logs),
+            'downloads': [log.to_dict() for log in download_logs]
         })
     except Exception as e:
         return jsonify({
