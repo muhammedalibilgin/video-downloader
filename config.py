@@ -26,6 +26,9 @@ class Config:
     # Download log limiti
     DOWNLOAD_LOG_LIMIT = 500
     
+    # Maksimum dosya boyutu (byte cinsinden)
+    MAX_FILE_SIZE = 200 * 1024 * 1024  # 200MB
+    
     # Rate limiting
     RATE_LIMIT_PER_MINUTE = "3 per minute"
     RATE_LIMIT_PER_DAY = "30 per day"

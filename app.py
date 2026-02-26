@@ -102,7 +102,14 @@ def preview():
                              preview_title=video_info['title'],
                              original_url=video_info['original_url'])
     except Exception as e:
-        flash(f'Video önizlenemedi: {e}')
+        # Özel hata mesajları
+        error_msg = str(e)
+        if "çok büyük" in error_msg.lower():
+            flash(f'⚠️ {error_msg}')
+        elif "güvenli olmayan url" in error_msg.lower():
+            flash(f'🔒 {error_msg}')
+        else:
+            flash(f'Video önizlenemedi: {e}')
         return redirect(url_for('index'))
 
 @app.route('/download', methods=['POST'])
@@ -130,7 +137,7 @@ def download():
         log_download_result(url, success=False)
         
         flash(f"Hata oluştu: {e}")
-        return f"<h3>Hata: Bu URL desteklenmiyor veya video bulunamadı.</h3><a href='/'>Geri Dön</a>", 400
+        return f"<h3>Hata: Bu URL desteklenmiyor / Boyut sınırı aşıldı veya Video bulunamadı.</h3><a href='/'>Geri Dön</a>", 400
 
 # Admin endpoint'i - ziyaretçi loglarını görüntüle (Basic Authentication ile korumalı)
 @app.route('/admin/visitors')

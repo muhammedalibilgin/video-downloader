@@ -89,6 +89,14 @@ def get_video_info(url):
     # 3. Video bilgilerini al
     with yt_dlp.YoutubeDL({'quiet': True}) as ydl:
         info = ydl.extract_info(final_url, download=False)
+        
+        # Dosya boyutu kontrolü
+        file_size = info.get('filesize') or info.get('filesize_approx')
+        if file_size and file_size > Config.MAX_FILE_SIZE:
+            size_mb = file_size / (1024 * 1024)
+            limit_mb = Config.MAX_FILE_SIZE / (1024 * 1024)
+            raise Exception(f"Video dosyası çok büyük: {size_mb:.1f}MB (max: {limit_mb:.0f}MB)")
+        
         video_url = info.get('url', final_url)  # Eğer url gelmezse m3u8 linkini kullan
         title = info.get('title', 'Video')
         
@@ -124,7 +132,7 @@ def download_video(url):
             'format': 'best',
             'outtmpl': f'{Config.DOWNLOAD_FOLDER}/{unique_id}.%(ext)s',
             'restrictfilenames': True,
-            'max_filesize': 200 * 1024 * 1024,  # 200MB limit
+            'max_filesize': Config.MAX_FILE_SIZE,  # Config'den oku
             'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         }
         
