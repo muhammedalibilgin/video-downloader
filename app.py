@@ -4,7 +4,7 @@ from flask_limiter.util import get_remote_address
 from config import Config
 from models import db
 from services.auth import requires_auth
-from services.video import get_video_info, download_video
+from services.video import get_video_info, download_video, FileSizeError
 from services.visitor import log_visitor, get_recent_visitors
 from services.download_log import log_download_preview, log_download_attempt, log_download_result, get_recent_download_logs
 from utils.database import configure_sqlite
@@ -105,11 +105,10 @@ def preview():
                              original_url=video_info['original_url'])
     except Exception as e:
         # Özel hata mesajları
-        error_msg = str(e)
-        if "çok büyük" in error_msg.lower():
-            flash(f'⚠️ {error_msg}')
-        elif "güvenli olmayan url" in error_msg.lower():
-            flash(f'🔒 {error_msg}')
+        if isinstance(e, FileSizeError):
+            flash(f'⚠️ {e}')
+        elif "güvenli olmayan url" in str(e).lower():
+            flash(f'🔒 {e}')
         else:
             flash(f'Video önizlenemedi: {e}')
         return redirect(url_for('index'))
@@ -151,9 +150,16 @@ def download():
         log_download_result(url, success=False, file_size=file_size)
         
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return jsonify({'success': False, 'error': str(e)})
+            error_msg = str(e)
+            if isinstance(e, FileSizeError):
+                return jsonify({'success': False, 'error': str(e)})
+            else:
+                return jsonify({'success': False, 'error': 'Desteklenmeyen Platform.'})
         else:
-            flash(f"Hata oluştu: {e}")
+            if isinstance(e, FileSizeError):
+                flash(f"⚠️ {e}")
+            else:
+                flash("Desteklenmeyen Platform.")
             return f"<h3>Hata: Bu URL desteklenmiyor / Boyut sınırı aşıldı veya Video bulunamadı.</h3><a href='/'>Geri Dön</a>", 400
 
 @app.route('/get_file/<file_id>')

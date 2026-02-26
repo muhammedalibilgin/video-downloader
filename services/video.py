@@ -11,6 +11,10 @@ import socket
 from flask import send_file
 from config import Config
 
+class FileSizeError(Exception):
+    """Dosya boyutu hatası için özel exception"""
+    pass
+
 def is_safe_url(url):
     """SSRF koruması: URL'in güvenli olup olmadığını kontrol et"""
     if not url:
@@ -88,25 +92,32 @@ def get_video_info(url):
     print(f"Önizleme URL: {final_url}")
     
     # 3. Video bilgilerini al
-    with yt_dlp.YoutubeDL({'quiet': True}) as ydl:
-        info = ydl.extract_info(final_url, download=False)
-        
-        # Dosya boyutu kontrolü
-        file_size = info.get('filesize') or info.get('filesize_approx')
-        if file_size and file_size > Config.MAX_FILE_SIZE:
-            size_mb = file_size / (1024 * 1024)
-            limit_mb = Config.MAX_FILE_SIZE / (1024 * 1024)
-            raise Exception(f"Video dosyası çok büyük: {size_mb:.1f}MB (max: {limit_mb:.0f}MB)")
-        
-        video_url = info.get('url', final_url)  # Eğer url gelmezse m3u8 linkini kullan
-        title = info.get('title', 'Video')
-        
-    return {
-        'video_url': video_url,
-        'title': title,
-        'original_url': url,
-        'file_size': file_size  # Boyut bilgisini de ekle
-    }
+    try:
+        with yt_dlp.YoutubeDL({'quiet': True}) as ydl:
+            info = ydl.extract_info(final_url, download=False)
+            
+            # Dosya boyutu kontrolü
+            file_size = info.get('filesize') or info.get('filesize_approx')
+            if file_size and file_size > Config.MAX_FILE_SIZE:
+                size_mb = file_size / (1024 * 1024)
+                limit_mb = Config.MAX_FILE_SIZE / (1024 * 1024)
+                raise FileSizeError(f"Video dosyası çok büyük: {size_mb:.1f}MB (max: {limit_mb:.0f}MB)")
+            
+            video_url = info.get('url', final_url)  # Eğer url gelmezse m3u8 linkini kullan
+            title = info.get('title', 'Video')
+            
+        return {
+            'video_url': video_url,
+            'title': title,
+            'original_url': url,
+            'file_size': file_size  # Boyut bilgisini de ekle
+        }
+    except Exception as e:
+        # Dosya boyutu hatasıysa orijinal mesajı koru
+        if isinstance(e, FileSizeError):
+            raise
+        else:
+            raise Exception("Desteklenmeyen Platform.")
 
 def download_video(url):
     """Videoyu indir ve dosya bilgilerini döndür"""
@@ -173,4 +184,8 @@ def download_video(url):
                 
                 return response
     except Exception as e:
-        raise Exception(f"Hata: Bu URL desteklenmiyor veya video bulunamadı. {e}")
+        # Dosya boyutu hatasıysa orijinal mesajı koru
+        if isinstance(e, FileSizeError):
+            raise
+        else:
+            raise Exception("Desteklenmeyen Platform.")
