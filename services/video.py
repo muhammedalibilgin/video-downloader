@@ -95,11 +95,9 @@ def get_video_info(url):
     try:
         ydl_opts = {
             'quiet': True,
-            'impersonate_tls_client': 'chrome',  # TLS seviyesinde taklit
-            'impersonate_header': 'chrome',      # Header seviyesinde taklit
             'extractor_args': {
-                'youtube': {
-                    'player_client': ['android', 'web']
+                'generic': {
+                    'impersonate': 'chrome'
                 }
             }
         }
@@ -157,11 +155,9 @@ def download_video(url):
             'restrictfilenames': True,
             'max_filesize': Config.MAX_FILE_SIZE,  # Config'den oku
             'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-            'impersonate_tls_client': 'chrome',  # TLS seviyesinde taklit
-            'impersonate_header': 'chrome',      # Header seviyesinde taklit
             'extractor_args': {
-                'youtube': {
-                    'player_client': ['android', 'web']
+                'generic': {
+                    'impersonate': 'chrome'
                 }
             }
         }
