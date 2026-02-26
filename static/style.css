@@ -77,3 +77,60 @@ button {
     border-radius: 5px;
     margin-top: 10px;
 }
+
+/* Skeleton Screen Styles */
+.skeleton-container {
+    display: none;
+    margin-top: 20px;
+}
+
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 8px;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.skeleton-title {
+    height: 24px;
+    width: 80%;
+    margin-bottom: 15px;
+}
+
+.skeleton-video {
+    height: 225px;
+    width: 100%;
+    max-width: 400px;
+    margin-bottom: 15px;
+}
+
+.skeleton-button {
+    height: 40px;
+    width: 120px;
+}
+
+/* Responsive Skeleton Styles */
+@media (max-width: 480px) {
+    .skeleton-video {
+        height: 180px;
+        max-width: 100%;
+    }
+    
+    .skeleton-title {
+        width: 90%;
+    }
+    
+    .skeleton-button {
+        width: 100px;
+        height: 36px;
+    }
+}

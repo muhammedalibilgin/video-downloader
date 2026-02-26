@@ -21,6 +21,13 @@
                 <input type="text" name="url" placeholder="Video Linkini Yapıştır" required value="{{ original_url or '' }}">
                 <button type="submit">Gönder</button>
             </form>
+
+            <!-- Skeleton Container - Başlangıçta gizli -->
+            <div id="skeletonContainer" class="skeleton-container">
+                <div class="skeleton skeleton-title"></div>
+                <div class="skeleton skeleton-video"></div>
+                <div class="skeleton skeleton-button"></div>
+            </div>
     
             {% if preview_url %}
             <div id="videoPreview" style="margin-top: 20px;">
@@ -57,6 +64,6 @@
         </div>
     </div>
 
-
+    <script src="{{ url_for('static', filename='js/preview.js') }}"></script>
 </body>
 </html>
