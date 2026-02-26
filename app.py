@@ -225,5 +225,10 @@ def admin_downloads():
             'error': str(e)
         }), 500
 
+# Custom rate limit error handler
+@app.errorhandler(429)
+def ratelimit_handler(e):
+    return render_template('rate_limit.html', limit=str(e.description)), 429
+
 if __name__ == '__main__':    
     app.run(host='0.0.0.0', port=5001, debug=False)

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Çok Fazla İstek - Video Downloader</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+</head>
+<body>
+    <div class="page-container">
+        <div class="header">
+            <a href="/">
+                <img src="{{ url_for('static', filename='images/video-downloader-logo.png') }}" alt="Video Downloader Logo" class="logo">
+            </a>
+            <p><a href="https://nsosyal.com" target="_blank">NSosyal</a> ve diğer bir çok platformdan videoları kolayca indirin</p>
+        </div>
+        
+        <div class="card">
+            <div class="rate-limit-container">
+                <div class="rate-limit-icon">⏱️</div>
+                <h2>Dakikada 3 / Günlük 30 Video</h2>
+                <p class="rate-limit-message">
+                    Lütfen biraz bekleyin. <strong>{{ limit }}</strong> kuralına göre çok fazla istek gönderdiniz.
+                </p>
+                <div class="rate-limit-tips">
+                    <h3>İpuçları:</h3>
+                    <ul>
+                        <li>1 dakika bekleyip tekrar deneyin</li>
+                        <li>Birden fazla video indirmek için aralıklı deneyin</li>
+                        <li>Günlük limit: 30 video</li>
+                    </ul>
+                </div>
+                <div class="rate-limit-actions">
+                    <a href="/" class="btn-primary" id="homeButton" disabled>
+                        <span class="btn-text">Ana Sayfaya Dön</span>
+                        <span class="countdown" id="countdown">(60)</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let countdown = 60;
+        const countdownElement = document.getElementById('countdown');
+        const homeButton = document.getElementById('homeButton');
+        
+        // Başlangıçta disabled stilini ekle
+        homeButton.classList.add('disabled');
+        
+        const timer = setInterval(() => {
+            countdown--;
+            countdownElement.textContent = `(${countdown})`;
+            
+            if (countdown <= 0) {
+                clearInterval(timer);
+                countdownElement.style.display = 'none';
+                homeButton.disabled = false;
+                homeButton.classList.remove('disabled');
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

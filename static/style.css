@@ -2,6 +2,91 @@ body{
     margin: 0;
     padding: 0;
 }
+
+/* Rate Limit Styles */
+.rate-limit-container {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.rate-limit-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+}
+
+.rate-limit-message {
+    font-size: 1.2rem;
+    margin: 20px 0;
+    color: #666;
+}
+
+.rate-limit-tips {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+    text-align: left;
+}
+
+.rate-limit-tips h3 {
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.rate-limit-tips ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.rate-limit-tips li {
+    margin: 8px 0;
+    color: #555;
+}
+
+.rate-limit-actions {
+    margin-top: 30px;
+}
+
+.rate-limit-actions .btn-primary,
+.rate-limit-actions .btn-secondary {
+    margin: 0 10px;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 1rem;
+}
+
+.rate-limit-actions .btn-primary {
+    background: #007bff;
+    color: white;
+    text-decoration: none;
+    position: relative;
+}
+
+.rate-limit-actions .btn-primary.disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.countdown {
+    margin-left: 8px;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.rate-limit-actions .btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.rate-limit-actions .btn-primary:hover:not(.disabled),
+.rate-limit-actions .btn-secondary:hover {
+    opacity: 0.9;
+}
 .header {
     text-align: center;
     margin-bottom: 2rem;
