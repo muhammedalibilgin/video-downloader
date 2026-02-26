@@ -6,3 +6,4 @@ gunicorn
 flask-sqlalchemy
 python-dotenv
 flask-limiter
+curl-cffi

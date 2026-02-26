@@ -93,7 +93,17 @@ def get_video_info(url):
     
     # 3. Video bilgilerini al
     try:
-        with yt_dlp.YoutubeDL({'quiet': True}) as ydl:
+        ydl_opts = {
+            'quiet': True,
+            'impersonate_tls_client': 'chrome',  # TLS seviyesinde taklit
+            'impersonate_header': 'chrome',      # Header seviyesinde taklit
+            'extractor_args': {
+                'youtube': {
+                    'player_client': ['android', 'web']
+                }
+            }
+        }
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(final_url, download=False)
             
             # Dosya boyutu kontrolü
@@ -146,7 +156,14 @@ def download_video(url):
             'outtmpl': f'{Config.DOWNLOAD_FOLDER}/{unique_id}.%(ext)s',
             'restrictfilenames': True,
             'max_filesize': Config.MAX_FILE_SIZE,  # Config'den oku
-            'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'impersonate_tls_client': 'chrome',  # TLS seviyesinde taklit
+            'impersonate_header': 'chrome',      # Header seviyesinde taklit
+            'extractor_args': {
+                'youtube': {
+                    'player_client': ['android', 'web']
+                }
+            }
         }
         
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
